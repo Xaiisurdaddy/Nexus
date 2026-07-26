@@ -1,0 +1,83 @@
+/*
+  NEXUS Design Tokens
+  Every color, font, spacing, and timing value used across the project is
+  defined here. Change a value in this file and it updates everywhere.
+  This is the file to edit first if you want to reskin NEXUS.
+*/
+
+:root {
+  /* Core palette */
+  --color-bg: #0a0e14;
+  --color-bg-deep: #05070b;
+  --color-panel: #0f1620;
+  --color-panel-glass: rgba(15, 22, 32, 0.55);
+  --color-border: rgba(0, 255, 242, 0.18);
+  --color-border-strong: rgba(0, 255, 242, 0.4);
+
+  /* Accent colors */
+  --color-cyan: #00fff2;
+  --color-cyan-dim: #0a9c95;
+  --color-purple: #9d4dff;
+  --color-purple-dim: #5c2fa3;
+  --color-red: #ff2e4d;
+  --color-red-dim: #a3172b;
+
+  /* Text */
+  --text-primary: #e6fbfa;
+  --text-secondary: #7fa3a0;
+  --text-muted: #435356;
+
+  /* Typography */
+  --font-display: 'Rajdhani', sans-serif;
+  --font-mono: 'Share Tech Mono', monospace;
+
+  /* Spacing scale */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+  --space-2xl: 64px;
+
+  /* Radii and glass effect */
+  --radius-sm: 2px;
+  --radius-md: 6px;
+
+  /* Glass blur is split into mobile and desktop tiers rather than one
+     value. backdrop-filter: blur() is one of the more GPU expensive CSS
+     effects, and mid range Android GPUs handle a strong blur worse than
+     desktop or high end phone hardware does. The mobile tier is used by
+     default, dashboard.css switches to the desktop tier at tablet width
+     and up. --blur-glass stays as a single small element fallback for
+     the boot screen's enter prompt, which is cheap regardless of tier
+     since it is one small element rather than a full panel background. */
+  --blur-glass: 8px;
+  --blur-glass-mobile: 6px;
+  --blur-glass-desktop: 12px;
+
+  /* Motion timing, used by JavaScript animations too through data attributes */
+  --duration-fast: 0.2s;
+  --duration-medium: 0.5s;
+  --duration-slow: 1.2s;
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Glow strengths, kept as separate tokens so effects.css can dial them
+     down for low power devices without touching color values */
+  --glow-cyan-soft: 0 0 8px rgba(0, 255, 242, 0.35);
+  --glow-cyan-strong: 0 0 24px rgba(0, 255, 242, 0.55);
+  --glow-purple-soft: 0 0 8px rgba(157, 77, 255, 0.35);
+  --glow-red-strong: 0 0 24px rgba(255, 46, 77, 0.6);
+}
+
+/* Reduced motion and reduced effects both read this attribute, set by
+   js/main.js after checking prefers-reduced-motion and a performance
+   heuristic. Components should check for [data-effects="reduced"]
+   rather than duplicating the media query everywhere. */
+[data-effects="reduced"] {
+  --duration-slow: 0.4s;
+  --duration-medium: 0.25s;
+  --glow-cyan-soft: 0 0 3px rgba(0, 255, 242, 0.25);
+  --glow-cyan-strong: 0 0 6px rgba(0, 255, 242, 0.3);
+  --glow-purple-soft: 0 0 3px rgba(157, 77, 255, 0.25);
+  --glow-red-strong: 0 0 6px rgba(255, 46, 77, 0.4);
+}

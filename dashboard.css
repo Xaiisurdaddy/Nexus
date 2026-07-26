@@ -1,0 +1,491 @@
+/*
+  Dashboard shell layout.
+  This is the persistent operating system frame. Modules (Spectral Scan,
+  Terminal, and so on) will render inside #center-stage in later
+  milestones. Nothing in this file should assume a specific module,
+  it only defines the frame around them.
+
+  This file is written mobile first. Every unqualified rule below is the
+  phone layout. Larger screens are progressively added back with
+  min-width media queries near the bottom, tablet first, then desktop.
+  Reasoning for each mobile specific decision is documented inline.
+*/
+
+#dashboard {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: none;
+  grid-template-columns: 1fr;
+  grid-template-rows: 48px 1fr 96px 60px;
+  grid-template-areas:
+    "status"
+    "center"
+    "console"
+    "nav";
+  opacity: 0;
+}
+
+#dashboard.active {
+  display: grid;
+}
+
+/* Shared glass panel treatment, reused by every region of the shell.
+   Blur is lighter by default (mobile) since backdrop-filter is one of
+   the more GPU expensive CSS effects and mid range Android GPUs handle
+   it worse than desktop hardware. It scales back up at tablet width. */
+.glass-panel {
+  background: var(--color-panel-glass);
+  backdrop-filter: blur(var(--blur-glass-mobile));
+  border: 1px solid var(--color-border);
+}
+
+/* Top status bar */
+#status-bar {
+  grid-area: status;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+  padding-top: env(safe-area-inset-top, 0px);
+  min-width: 0;
+}
+
+#status-bar .brand {
+  font-family: var(--font-display);
+  letter-spacing: 0.15em;
+  color: var(--color-cyan);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+#status-bar .status-cluster {
+  display: flex;
+  gap: var(--space-md);
+  font-size: 10px;
+  color: var(--text-secondary);
+  letter-spacing: 0.06em;
+  min-width: 0;
+}
+
+#status-bar .status-cluster span.value {
+  color: var(--color-cyan-dim);
+}
+
+#status-bar .status-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-cyan);
+  box-shadow: var(--glow-cyan-soft);
+  margin-right: 6px;
+  animation: dot-breathe 2.4s ease-in-out infinite;
+}
+
+/* On very narrow phones (roughly 360px and below) the words "SYSTEM
+   ONLINE" next to the brand name and clock do not fit comfortably. The
+   status dot alone still communicates "online" at a glance, so the
+   text label is the first thing to go, not the last. */
+@media (max-width: 360px) {
+  .status-text {
+    display: none;
+  }
+}
+
+@keyframes dot-breathe {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* Navigation rail. On phones this is a horizontally scrollable bottom
+   bar rather than a shrunk vertical rail. Nine module icons at a
+   comfortable touch target size do not fit in 320 to 412px of width,
+   and shrinking icons below about 44px hurts usability more than a
+   short horizontal swipe costs. The scroll happens inside this one
+   component, the page itself never scrolls horizontally. */
+#nav-rail {
+  grid-area: nav;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 0 var(--space-sm);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  border-top: 1px solid var(--color-border);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hide the scrollbar visually on the nav rail, the snap points and
+   horizontal swipe gesture make a visible scrollbar unnecessary and it
+   would clash with the OS aesthetic. Scrolling still works normally
+   for mouse, trackpad, and touch. */
+#nav-rail::-webkit-scrollbar {
+  display: none;
+}
+#nav-rail {
+  scrollbar-width: none;
+}
+
+.nav-module {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: border-color var(--duration-fast) var(--ease-standard),
+              color var(--duration-fast) var(--ease-standard),
+              box-shadow var(--duration-fast) var(--ease-standard);
+  position: relative;
+}
+
+.nav-module:hover,
+.nav-module:focus-visible {
+  border-color: var(--color-border-strong);
+  color: var(--color-cyan);
+  box-shadow: var(--glow-cyan-soft);
+}
+
+.nav-module[data-status="alert"] {
+  border-color: var(--color-red);
+  color: var(--color-red);
+}
+
+.nav-module .nav-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Tooltip label. Hover labels make no sense on a touch device (there is
+   no hover), so this is hidden by default on the mobile base layout and
+   only re-enabled at tablet width and up where a mouse or trackpad is
+   the more likely input method. */
+.nav-module .nav-label {
+  display: none;
+  position: absolute;
+  left: calc(100% + 10px);
+  white-space: nowrap;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  background: var(--color-panel);
+  border: 1px solid var(--color-border);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-4px);
+  transition: opacity var(--duration-fast) var(--ease-standard),
+              transform var(--duration-fast) var(--ease-standard);
+}
+
+.nav-module:hover .nav-label,
+.nav-module:focus-visible .nav-label {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Center stage, where modules will mount */
+#center-stage {
+  grid-area: center;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-md);
+  min-width: 0;
+  min-height: 0;
+}
+
+#center-stage .idle-state {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 0 var(--space-sm);
+}
+
+#center-stage .idle-state h2 {
+  color: var(--text-secondary);
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  margin-bottom: var(--space-sm);
+}
+
+#center-stage .idle-state p {
+  font-size: 12px;
+}
+
+/* Radar sweep decoration behind the idle state, pure CSS. Sized down
+   on phones so it never exceeds the available center stage width and
+   forces a scrollbar, since #center-stage clips overflow this cannot
+   cause page scrolling, but an oversized radar still looks cramped. */
+.radar {
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: -1;
+}
+
+.radar::before {
+  content: '';
+  position: absolute;
+  width: 70%;
+  height: 70%;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+}
+
+.radar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(0, 255, 242, 0.25), transparent 35%);
+  animation: radar-spin 4s linear infinite;
+}
+
+[data-effects="reduced"] .radar::after {
+  animation: radar-spin 8s linear infinite;
+}
+
+@keyframes radar-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Ambient telemetry panel. Hidden by default on phones, it is
+   decorative flavor rather than a core function, so on a small screen
+   center stage and console (the parts an operator actually uses) get
+   the space instead. It reappears at desktop width, see media queries
+   below. */
+#telemetry-panel {
+  display: none;
+  grid-area: telemetry;
+  border-left: 1px solid var(--color-border);
+  padding: var(--space-md);
+  font-size: 11px;
+  color: var(--text-secondary);
+  overflow: hidden;
+}
+
+#telemetry-panel h3 {
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--color-purple);
+  margin-bottom: var(--space-sm);
+}
+
+.telemetry-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(0, 255, 242, 0.08);
+}
+
+.telemetry-row .value {
+  color: var(--color-cyan-dim);
+}
+
+/* Bottom console, the AI Core's text output and command line */
+#console-panel {
+  grid-area: console;
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-sm) var(--space-md);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* min-height: 0 on the flex child is required here, without it a flex
+   item inside a CSS grid area can refuse to shrink below its content
+   size, which is a common cause of an inner element overflowing its
+   grid area and forcing the whole page to scroll. */
+#console-output {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  font-size: 11px;
+  color: var(--color-cyan-dim);
+  line-height: 1.6;
+}
+
+#console-output .console-line .prefix {
+  color: var(--color-purple);
+  margin-right: 6px;
+}
+
+#console-input-row {
+  display: flex;
+  align-items: center;
+  margin-top: var(--space-xs);
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-xs);
+  flex-shrink: 0;
+}
+
+#console-input-row .prompt-symbol {
+  color: var(--color-cyan);
+  margin-right: var(--space-sm);
+}
+
+/* Font size is 16px on mobile deliberately, not a smaller value. Mobile
+   Safari zooms the whole page in when a text input smaller than 16px
+   receives focus, which then requires the operator to manually zoom
+   back out, breaking the fixed app shell layout. 16px avoids the zoom
+   entirely. Desktop can use a smaller value since this bug does not
+   apply there. */
+#console-input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  padding: 6px 0;
+}
+
+#console-input:focus {
+  outline: none;
+}
+
+/* --------------------------------------------------------------------
+   Tablet and up. Restores the vertical nav rail with hover labels,
+   since a mouse or trackpad is the likely input method here and there
+   is enough width for a side rail without crowding center stage.
+-------------------------------------------------------------------- */
+@media (min-width: 768px) {
+  .glass-panel {
+    backdrop-filter: blur(var(--blur-glass-desktop));
+  }
+
+  #dashboard {
+    grid-template-columns: 64px 1fr;
+    grid-template-rows: 56px 1fr 130px;
+    grid-template-areas:
+      "status status"
+      "nav center"
+      "nav console";
+  }
+
+  #status-bar {
+    padding: 0 var(--space-lg);
+  }
+
+  #status-bar .brand {
+    font-size: 15px;
+  }
+
+  #status-bar .status-cluster {
+    font-size: 11px;
+    gap: var(--space-lg);
+  }
+
+  #nav-rail {
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: var(--space-lg) 0 0;
+    gap: var(--space-md);
+    border-top: none;
+    border-right: 1px solid var(--color-border);
+    overflow: visible;
+  }
+
+  .nav-module {
+    width: 44px;
+    height: 44px;
+  }
+
+  .nav-module .nav-label {
+    display: block;
+  }
+
+  #center-stage {
+    padding: var(--space-lg);
+  }
+
+  #center-stage .idle-state h2 {
+    font-size: 20px;
+  }
+
+  #center-stage .idle-state p {
+    font-size: 13px;
+  }
+
+  .radar {
+    width: 280px;
+    height: 280px;
+  }
+
+  #console-panel {
+    padding: var(--space-md) var(--space-lg);
+  }
+
+  #console-output {
+    font-size: 12px;
+  }
+
+  #console-input {
+    font-size: 14px;
+  }
+}
+
+/* --------------------------------------------------------------------
+   Desktop and up. Reintroduces the telemetry panel as a third column
+   now that there is enough width for it without crowding the modules
+   that actually matter.
+-------------------------------------------------------------------- */
+@media (min-width: 1024px) {
+  #dashboard {
+    grid-template-columns: 72px 1fr 260px;
+    grid-template-rows: 56px 1fr 140px;
+    grid-template-areas:
+      "status status status"
+      "nav center telemetry"
+      "nav console console";
+  }
+
+  #telemetry-panel {
+    display: block;
+  }
+
+  .radar {
+    width: 360px;
+    height: 360px;
+  }
+}
+
+/* --------------------------------------------------------------------
+   Short landscape phones (for example a phone rotated sideways, where
+   height drops to around 360 to 430px). The mobile column layout above
+   still applies here since width is often still under 768px, but the
+   fixed height regions (status bar, console, nav) need to shrink so
+   center stage does not get squeezed to nothing.
+-------------------------------------------------------------------- */
+@media (max-width: 900px) and (max-height: 430px) and (orientation: landscape) {
+  #dashboard {
+    grid-template-rows: 40px 1fr 72px 48px;
+  }
+
+  #console-output {
+    font-size: 10px;
+  }
+
+  .radar {
+    width: 130px;
+    height: 130px;
+  }
+}

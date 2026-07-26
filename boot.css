@@ -1,0 +1,163 @@
+/*
+  Boot sequence and welcome screen styles.
+  This layer sits on top of everything else until the operator presses
+  ENTER, at which point js/boot-sequence.js fades it out and reveals
+  the dashboard underneath.
+*/
+
+#boot-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background-color: var(--color-bg-deep);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-lg);
+  padding-top: max(var(--space-lg), env(safe-area-inset-top, 0px));
+  /* On short landscape phones the three boot stages could in theory
+     exceed the viewport height. They render one at a time rather than
+     stacked, so this is a safety net rather than an expected case, but
+     overflow: auto here means content scrolls into view instead of
+     clipping silently if it ever does happen. */
+  overflow-y: auto;
+}
+
+/* Stage 1: scrolling boot log, styled like a terminal */
+#boot-log {
+  font-family: var(--font-mono);
+  font-size: clamp(11px, 2vw, 14px);
+  color: var(--color-cyan-dim);
+  width: min(560px, 90vw);
+  min-height: 220px;
+  line-height: 1.8;
+}
+
+#boot-log .log-line {
+  opacity: 0;
+  white-space: pre;
+}
+
+#boot-log .log-line.status-online {
+  color: var(--color-cyan);
+  text-shadow: var(--glow-cyan-soft);
+}
+
+#boot-log .cursor {
+  display: inline-block;
+  width: 8px;
+  height: 14px;
+  background: var(--color-cyan);
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
+/* Stage 2: NEXUS wordmark reveal */
+#boot-wordmark {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+#boot-wordmark h1 {
+  font-size: clamp(48px, 10vw, 96px);
+  letter-spacing: 0.25em;
+  color: var(--color-cyan);
+  text-shadow: var(--glow-cyan-strong);
+  opacity: 0;
+}
+
+#boot-wordmark p.tagline {
+  font-family: var(--font-mono);
+  font-size: clamp(12px, 2vw, 16px);
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--color-purple);
+  margin-top: var(--space-sm);
+  opacity: 0;
+}
+
+/* Stage 3: welcome and enter prompt */
+#boot-welcome {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-md);
+  margin-top: var(--space-2xl);
+}
+
+#boot-welcome p {
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  font-size: clamp(13px, 2vw, 16px);
+  opacity: 0;
+}
+
+#boot-welcome .enter-prompt {
+  color: var(--color-cyan);
+  border: 1px solid var(--color-border-strong);
+  padding: var(--space-sm) var(--space-lg);
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.15em;
+  animation: pulse-border 2s var(--ease-standard) infinite;
+  background: var(--color-panel-glass);
+  backdrop-filter: blur(var(--blur-glass));
+}
+
+@keyframes pulse-border {
+  0%, 100% { box-shadow: var(--glow-cyan-soft); }
+  50% { box-shadow: var(--glow-cyan-strong); }
+}
+
+/* A brief static glitch flicker layered over the boot screen for texture.
+   Purely decorative and fully disabled under reduced effects. */
+#boot-screen.glitching::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 255, 242, 0.04) 0px,
+    transparent 2px,
+    transparent 4px
+  );
+  pointer-events: none;
+  animation: glitch-flicker 0.15s steps(2, end) 3;
+}
+
+[data-effects="reduced"] #boot-screen.glitching::before {
+  animation: none;
+}
+
+@keyframes glitch-flicker {
+  0% { opacity: 0; transform: translateX(0); }
+  50% { opacity: 1; transform: translateX(-2px); }
+  100% { opacity: 0; transform: translateX(0); }
+}
+
+#boot-skip-hint {
+  position: fixed;
+  bottom: max(var(--space-md), env(safe-area-inset-bottom, 0px));
+  right: max(var(--space-md), env(safe-area-inset-right, 0px));
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  z-index: 101;
+}
+
+/* The skip hint tells the operator to press ESC, a key that does not
+   exist on a touch keyboard. Rather than show misleading instructions,
+   it is hidden below tablet width, where a physical keyboard is much
+   less likely to be present. Touch users can still tap the enter
+   prompt itself once boot reaches that stage. */
+@media (max-width: 767px) {
+  #boot-skip-hint {
+    display: none;
+  }
+}

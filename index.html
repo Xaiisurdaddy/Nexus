@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>NEXUS: Paranormal Intelligence System</title>
+  <meta name="description" content="NEXUS is a fictional, entertainment only paranormal intelligence interface. All scans and reports are procedurally generated and not real." />
+
+  <!-- Google Fonts, loaded via CDN so no font files need to be hosted locally -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/boot.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/effects.css" />
+</head>
+<body>
+
+  <!-- Fictional entertainment disclosure. Visually unobtrusive but present
+       in the markup for anyone inspecting the page, and stated again in the
+       README for anyone deploying this project. -->
+  <p class="visually-hidden">
+    NEXUS is a work of fiction created for entertainment. It does not detect ghosts,
+    access real devices, or perform genuine paranormal investigation. All readings,
+    scans, and case files are procedurally generated fiction.
+  </p>
+
+  <div id="particle-field"></div>
+  <div id="scanline-overlay"></div>
+
+  <!-- Boot sequence overlay, shown first and removed once the operator
+       presses ENTER -->
+  <section id="boot-screen" aria-label="System boot sequence">
+    <div id="boot-log" aria-live="polite"></div>
+
+    <div id="boot-wordmark">
+      <h1>NEXUS</h1>
+      <p class="tagline">Paranormal Intelligence System</p>
+    </div>
+
+    <div id="boot-welcome">
+      <p>Welcome, Operator.</p>
+      <p>Authentication not required.</p>
+      <p class="enter-prompt" role="button" tabindex="0">PRESS ENTER TO CONTINUE</p>
+    </div>
+  </section>
+
+  <p id="boot-skip-hint">PRESS ESC TO SKIP</p>
+
+  <!-- Dashboard shell, hidden until the boot sequence completes -->
+  <main id="dashboard" aria-label="NEXUS dashboard">
+
+    <header id="status-bar" class="glass-panel">
+      <span class="brand">NEXUS</span>
+      <div class="status-cluster">
+        <span><span class="status-dot"></span><span class="status-text">SYSTEM ONLINE</span></span>
+        <span>TIME <span class="value" id="status-clock">00:00:00</span></span>
+      </div>
+    </header>
+
+    <nav id="nav-rail" class="glass-panel" aria-label="Modules">
+      <button class="nav-module" data-module="AI Core" aria-label="AI Core">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>
+        <span class="nav-label">AI Core</span>
+      </button>
+      <button class="nav-module" data-module="Spectral Scan" aria-label="Spectral Scan">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12h4l2 6 4-14 2 8h6"/></svg>
+        <span class="nav-label">Spectral Scan</span>
+      </button>
+      <button class="nav-module" data-module="Environmental Monitor" aria-label="Environmental Monitor">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3v10.5a4 4 0 1 0 2 0V3z"/></svg>
+        <span class="nav-label">Environmental Monitor</span>
+      </button>
+      <button class="nav-module" data-module="EVP Analyzer" aria-label="EVP Analyzer">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 12h2l2-6 3 12 3-9 2 3h4"/></svg>
+        <span class="nav-label">EVP Analyzer</span>
+      </button>
+      <button class="nav-module" data-module="Terminal" aria-label="Terminal">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 5h16v14H4z"/><path d="M7 9l3 3-3 3"/></svg>
+        <span class="nav-label">Terminal</span>
+      </button>
+      <button class="nav-module" data-module="Entity Database" aria-label="Entity Database">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v12c0 1.6 3.1 3 7 3s7-1.4 7-3V6"/></svg>
+        <span class="nav-label">Entity Database</span>
+      </button>
+      <button class="nav-module" data-module="Satellite Scanner" aria-label="Satellite Scanner">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3v6M12 15v6M3 12h6M15 12h6"/><circle cx="12" cy="12" r="3"/></svg>
+        <span class="nav-label">Satellite Scanner</span>
+      </button>
+      <button class="nav-module" data-module="Classified Case Files" aria-label="Classified Case Files">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h16v13H4z"/><path d="M4 6l8 5 8-5"/></svg>
+        <span class="nav-label">Classified Case Files</span>
+      </button>
+      <button class="nav-module" data-status="alert" data-module="Emergency Protocol" aria-label="Emergency Protocol">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17h.01"/></svg>
+        <span class="nav-label">Emergency Protocol</span>
+      </button>
+    </nav>
+
+    <section id="center-stage">
+      <div class="radar" aria-hidden="true"></div>
+      <div class="idle-state">
+        <h2>NO MODULE ACTIVE</h2>
+        <p>Select a module from the rail to begin.</p>
+      </div>
+    </section>
+
+    <aside id="telemetry-panel" class="glass-panel" aria-label="Ambient telemetry">
+      <h3>AMBIENT TELEMETRY</h3>
+      <div class="telemetry-row"><span>EM FIELD</span><span class="value" id="telemetry-em">0.0 mG</span></div>
+      <div class="telemetry-row"><span>TEMP DRIFT</span><span class="value" id="telemetry-temp">0.0</span></div>
+      <div class="telemetry-row"><span>SIGNAL INTEGRITY</span><span class="value" id="telemetry-signal">0</span></div>
+    </aside>
+
+    <section id="console-panel" class="glass-panel" aria-label="AI Core console">
+      <div id="console-output"></div>
+      <div id="console-input-row">
+        <span class="prompt-symbol">&gt;</span>
+        <label for="console-input" class="visually-hidden">Command input</label>
+        <input type="text" id="console-input" autocomplete="off" spellcheck="false" placeholder="Type a command..." />
+      </div>
+    </section>
+
+  </main>
+
+  <!-- GSAP for the boot sequence and panel transitions -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <!-- tsParticles for the ambient background particle field -->
+  <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
+
+  <script src="js/utils.js"></script>
+  <script src="js/audio-engine.js"></script>
+  <script src="js/particles-config.js"></script>
+  <script src="js/ai-core.js"></script>
+  <script src="js/boot-sequence.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

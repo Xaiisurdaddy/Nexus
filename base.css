@@ -1,0 +1,122 @@
+/*
+  Base reset and global styles.
+  Keeps the visual reset separate from component styling so boot.css and
+  dashboard.css only contain rules specific to those screens.
+*/
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  overflow: hidden;
+  /* 100vh on mobile browsers includes space the address bar can occupy,
+     which causes the bottom of a fixed layout to sit partly offscreen
+     or under the browser chrome. 100dvh tracks the actual visible
+     viewport instead. The 100vh line stays first as a fallback for
+     older browsers that do not support dvh, the dvh line overrides it
+     wherever it is supported. */
+  height: 100vh;
+  height: 100dvh;
+  width: 100vw;
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+  /* Stops the rubber band overscroll bounce on iOS and some Android
+     browsers, which would otherwise reveal a flash of unstyled page
+     background above or below the fixed app shell during a fast swipe. */
+  overscroll-behavior: none;
+  /* Removes the gray tap highlight flash Android shows on touch, which
+     looks out of place against a glassmorphic dark interface. Focus
+     state is still fully visible through :focus-visible. */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* A faint vignette and base grid texture sit behind everything.
+   Pure CSS so it costs nothing on low power devices. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(0, 255, 242, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 242, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(circle at 50% 50%, transparent 40%, var(--color-bg-deep) 140%);
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+button {
+  font-family: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* Visible focus outline for keyboard users. Never remove this without
+   replacing it with something equally visible, NEXUS is a keyboard first
+   interface so focus state matters more here than on a typical website. */
+:focus-visible {
+  outline: 2px solid var(--color-cyan);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--color-cyan);
+  color: var(--color-bg-deep);
+}
+
+/* Scrollbars styled to match the interface rather than the browser default */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-deep);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-cyan-dim);
+  border-radius: var(--radius-sm);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+#particle-field {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
